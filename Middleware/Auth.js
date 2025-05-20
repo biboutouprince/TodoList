@@ -22,8 +22,7 @@ export const verifyToken = (req, res, next) => {
   if (!token) {
     console.error("Erreur: Aucun token trouvé");
     return res.status(401).json({
-      message:
-        "Accès non autorisé. Connectez-vous en tant qu'admin. Token manquant.",
+      message: "Accès non autorisé. Connectez-vous!. Token manquant.",
     });
   }
 

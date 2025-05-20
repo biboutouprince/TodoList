@@ -3,10 +3,7 @@ import dotenv from "dotenv";
 import ejs from "ejs";
 import cors from "cors";
 import UserRoute from "./Routes/UserRoute.js";
-/*
-import inscriptionRoute from "./routes/inscriptionRoute.js";
-import anniversaireRoute from "./routes/anniversaireRoute.js";
-*/
+import TacheRoute from "./Routes/TacheRoute.js";
 
 const app = express();
 dotenv.config();
@@ -24,9 +21,8 @@ app.use(
   })
 );
 
-app.use("/api", UserRoute);
-//app.use("/admin", adminRoute);
-//app.use("/admin", anniversaireRoute);
+app.use("/", UserRoute);
+app.use("/task", TacheRoute);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

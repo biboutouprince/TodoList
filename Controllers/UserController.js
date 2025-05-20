@@ -30,7 +30,7 @@ export const inscrireUtilisateur = async (req, res) => {
     }
 
     const emailLowerCase = email.toLowerCase();
-    const utilisateurExiste = await prisma.user.findUnique({
+    const utilisateurExiste = await prisma.User.findUnique({
       where: { email: emailLowerCase },
     });
 
@@ -40,7 +40,7 @@ export const inscrireUtilisateur = async (req, res) => {
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
-    const nouvelUtilisateur = await prisma.user.create({
+    const nouvelUtilisateur = await prisma.User.create({
       data: {
         nom,
         email: emailLowerCase,
@@ -70,7 +70,7 @@ export const loginUtilisateur = async (req, res) => {
       return res.status(400).json({ message: "Email et mot de passe requis" });
     }
 
-    const utilisateur = await prisma.user.findUnique({
+    const utilisateur = await prisma.User.findUnique({
       where: { email: email.toLowerCase() },
     });
 
@@ -109,4 +109,13 @@ export const loginUtilisateur = async (req, res) => {
       .status(500)
       .json({ message: "Erreur serveur", error: error.toString() });
   }
+};
+
+export const logoutUtilisateur = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+  res.status(200).json({ message: "Déconnexion réussie" });
 };
