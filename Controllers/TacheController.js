@@ -10,6 +10,22 @@ export const creerTache = async (req, res) => {
   const { titre, description, dueDate, priorite, status } = req.body;
   const userId = req.user.id;
 
+  // Vérifier que les valeurs enum sont valides
+  const prioriteValides = ["Faible", "Moyen", "Difficile"];
+  const statusValides = ["Attente", "En_cours", "Termine"];
+
+  if (!prioriteValides.includes(priorite)) {
+    return res.status(400).json({ message: "Priorité invalide" });
+  }
+
+  if (!statusValides.includes(status)) {
+    return res.status(400).json({ message: "Statut invalide" });
+  }
+
+  if (!dueDate || isNaN(Date.parse(dueDate))) {
+    return res.status(400).json({ message: "Date invalide" });
+  }
+
   try {
     const tache = await prisma.tache.create({
       data: {
@@ -24,7 +40,10 @@ export const creerTache = async (req, res) => {
 
     res.status(201).json(tache);
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la création", error });
+    console.error("Erreur Prisma :", error);
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la création de la tache", error });
   }
 };
 
@@ -50,6 +69,23 @@ export const modifierTache = async (req, res) => {
   const { id } = req.params;
   const { titre, description, dueDate, priorite, status } = req.body;
 
+  // Enums valides
+  const prioriteValides = ["Faible", "Moyen", "Difficile"];
+  const statusValides = ["Attente", "En_cours", "Termine"];
+
+  // Vérifications
+  if (priorite && !prioriteValides.includes(priorite)) {
+    return res.status(400).json({ message: "Priorité invalide" });
+  }
+
+  if (status && !statusValides.includes(status)) {
+    return res.status(400).json({ message: "Statut invalide" });
+  }
+
+  if (dueDate && isNaN(Date.parse(dueDate))) {
+    return res.status(400).json({ message: "Date invalide" });
+  }
+
   try {
     const tacheExistante = await prisma.tache.findUnique({
       where: { id: parseInt(id) },
@@ -72,6 +108,7 @@ export const modifierTache = async (req, res) => {
 
     res.status(200).json(tache);
   } catch (error) {
+    console.error("Erreur lors de la mise à jour :", error);
     res.status(500).json({ message: "Erreur lors de la mise à jour", error });
   }
 };

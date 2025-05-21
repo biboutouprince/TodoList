@@ -111,6 +111,7 @@ export const loginUtilisateur = async (req, res) => {
   }
 };
 
+//deconnexion utilisateur (admin ou user)
 export const logoutUtilisateur = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -118,4 +119,76 @@ export const logoutUtilisateur = (req, res) => {
     sameSite: "Strict",
   });
   res.status(200).json({ message: "Déconnexion réussie" });
+};
+
+//demande de reinitialisation de password
+export const requestResetPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res.status(400).json({ message: "Email requis" });
+    }
+
+    const utilisateur = await prisma.User.findUnique({
+      where: { email: email.toLowerCase() },
+    });
+
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    const resetToken = jwt.sign(
+      { id: utilisateur.id, email: utilisateur.email },
+      JWT_SECRET,
+      { expiresIn: "15m" } // Token temporaire
+    );
+
+    // À faire : envoyer par email
+    console.log(
+      `Lien de réinitialisation : http://localhost:3000/reset-password?token=${resetToken}`
+    );
+
+    res.status(200).json({
+      message: "Lien de réinitialisation envoyé (simulé dans console)",
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Erreur serveur", error: error.toString() });
+  }
+};
+
+//nouveau password
+export const resetPassword = async (req, res) => {
+  const { token, nouveauPassword } = req.body;
+
+  try {
+    if (!token || !nouveauPassword) {
+      return res
+        .status(400)
+        .json({ message: "Token et nouveau mot de passe requis" });
+    }
+
+    const payload = jwt.verify(token, JWT_SECRET);
+    const hashedPassword = await bcryptjs.hash(nouveauPassword, 10);
+
+    await prisma.User.update({
+      where: { id: payload.id },
+      data: { password: hashedPassword },
+    });
+
+    res.status(200).json({ message: "Mot de passe réinitialisé avec succès" });
+  } catch (error) {
+    console.error(error);
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(400)
+        .json({ message: "Lien expiré, veuillez recommencer" });
+    }
+    res
+      .status(500)
+      .json({ message: "Erreur serveur", error: error.toString() });
+  }
 };

@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.get("/", verifyToken, listerTaches);
 router.post("/creer", verifyToken, creerTache);
-router.put("/:id", verifyToken, modifierTache);
-router.delete("/:id", verifyToken, supprimerTache);
+router.put("/edit/:id", verifyToken, modifierTache);
+router.delete("/delete/:id", verifyToken, supprimerTache);
 
 export default router;

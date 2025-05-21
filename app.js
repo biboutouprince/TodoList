@@ -4,6 +4,7 @@ import ejs from "ejs";
 import cors from "cors";
 import UserRoute from "./Routes/UserRoute.js";
 import TacheRoute from "./Routes/TacheRoute.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 dotenv.config();
@@ -13,6 +14,7 @@ app.engine("html", ejs.__express);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use(
   cors({
@@ -22,7 +24,7 @@ app.use(
 );
 
 app.use("/", UserRoute);
-app.use("/task", TacheRoute);
+app.use("/tache", TacheRoute);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
