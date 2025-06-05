@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const prisma = new PrismaClient();
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
@@ -21,7 +22,7 @@ export const afficherAccueil = (req, res) => {
 };
 
 //Inscription utilisateur (admin ou user)
-export const inscrireUtilisateur = async (req, res) => {
+export const register = async (req, res) => {
   const { nom, email, password, role } = req.body;
 
   try {
@@ -62,7 +63,7 @@ export const inscrireUtilisateur = async (req, res) => {
 };
 
 //Connexion utilisateur (admin ou user)
-export const loginUtilisateur = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -93,8 +94,8 @@ export const loginUtilisateur = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
+      secure: false,
+      sameSite: "Lax",
       maxAge: 3600000,
     });
 
@@ -102,6 +103,12 @@ export const loginUtilisateur = async (req, res) => {
       message: "Connexion réussie",
       token,
       role: utilisateur.role,
+      user: {
+        id: utilisateur.id,
+        nom: utilisateur.nom,
+        email: utilisateur.email,
+        role: utilisateur.role,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -111,12 +118,41 @@ export const loginUtilisateur = async (req, res) => {
   }
 };
 
+// Obtenir l'utilisateur actuellement connecté
+export const getCurrentUser = async (req, res) => {
+  try {
+    const { id } = req.user;
+
+    const utilisateur = await prisma.User.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        nom: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    res.status(200).json({ utilisateur });
+  } catch (error) {
+    console.error("Erreur dans getCurrentUser:", error);
+    res
+      .status(500)
+      .json({ message: "Erreur serveur", error: error.toString() });
+  }
+};
+
 //deconnexion utilisateur (admin ou user)
-export const logoutUtilisateur = (req, res) => {
+export const logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "Strict",
+    sameSite: "Lax",
   });
   res.status(200).json({ message: "Déconnexion réussie" });
 };

@@ -6,7 +6,7 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 // Créer une tâche
-export const creerTache = async (req, res) => {
+export const createTask = async (req, res) => {
   const { titre, description, dueDate, priorite, status } = req.body;
   const userId = req.user.id;
 
@@ -48,7 +48,7 @@ export const creerTache = async (req, res) => {
 };
 
 // Lister les tâches (tri par date ou priorité)
-export const listerTaches = async (req, res) => {
+export const getTasks = async (req, res) => {
   const userId = req.user.id;
   const { tri } = req.query;
 
@@ -65,7 +65,7 @@ export const listerTaches = async (req, res) => {
 };
 
 // Modifier une tâche
-export const modifierTache = async (req, res) => {
+export const changeTaskStatus = async (req, res) => {
   const { id } = req.params;
   const { titre, description, dueDate, priorite, status } = req.body;
 
@@ -114,7 +114,7 @@ export const modifierTache = async (req, res) => {
 };
 
 // Supprimer une tâche
-export const supprimerTache = async (req, res) => {
+export const deleteTask = async (req, res) => {
   const { id } = req.params;
 
   try {

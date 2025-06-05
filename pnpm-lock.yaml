@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@prisma/client':
         specifier: ^6.8.1
-        version: 6.8.1(prisma@6.8.1)
+        version: 6.8.1(prisma@6.8.1(typescript@5.8.3))(typescript@5.8.3)
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
@@ -40,7 +40,7 @@ importers:
         version: 9.0.2
       prisma:
         specifier: ^6.8.1
-        version: 6.8.1
+        version: 6.8.1(typescript@5.8.3)
       sqlite3:
         specifier: ^5.1.7
         version: 5.1.7
@@ -982,6 +982,11 @@ packages:
     resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
     engines: {node: '>= 0.6'}
 
+  typescript@5.8.3:
+    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   undefsafe@2.0.5:
     resolution: {integrity: sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==}
 
@@ -1040,9 +1045,10 @@ snapshots:
       rimraf: 3.0.2
     optional: true
 
-  '@prisma/client@6.8.1(prisma@6.8.1)':
+  '@prisma/client@6.8.1(prisma@6.8.1(typescript@5.8.3))(typescript@5.8.3)':
     optionalDependencies:
-      prisma: 6.8.1
+      prisma: 6.8.1(typescript@5.8.3)
+      typescript: 5.8.3
 
   '@prisma/config@6.8.1':
     dependencies:
@@ -1865,10 +1871,12 @@ snapshots:
       tar-fs: 2.1.2
       tunnel-agent: 0.6.0
 
-  prisma@6.8.1:
+  prisma@6.8.1(typescript@5.8.3):
     dependencies:
       '@prisma/config': 6.8.1
       '@prisma/engines': 6.8.1
+    optionalDependencies:
+      typescript: 5.8.3
 
   promise-inflight@1.0.1:
     optional: true
@@ -2125,6 +2133,9 @@ snapshots:
       content-type: 1.0.5
       media-typer: 1.1.0
       mime-types: 3.0.1
+
+  typescript@5.8.3:
+    optional: true
 
   undefsafe@2.0.5: {}
 

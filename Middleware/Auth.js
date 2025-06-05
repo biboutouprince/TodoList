@@ -8,6 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export const verifyToken = (req, res, next) => {
   console.log("Headers:", req.headers);
   console.log("Cookies:", req.cookies);
+  console.log("Authorization Header:", req.headers.authorization);
 
   const authHeader = req.headers.authorization;
   let token = null;

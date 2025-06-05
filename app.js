@@ -15,17 +15,16 @@ app.engine("html", ejs.__express);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 app.use(
   cors({
-    origin: "http://localhost:3000", // autorise uniquement ton frontend
-    credentials: true, // si tu utilises les cookies ou des headers d'authentification
+    origin: "http://localhost:3000",
+    credentials: true,
   })
 );
 
 app.use("/", UserRoute);
-app.use("/tache", TacheRoute);
+app.use("/tasks", TacheRoute);
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Le Serveur tourne sur le port ${port}`);
 });
