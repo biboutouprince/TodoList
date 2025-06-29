@@ -8,22 +8,20 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export const verifyToken = (req, res, next) => {
   console.log("Headers:", req.headers);
   console.log("Cookies:", req.cookies);
-  console.log("Authorization Header:", req.headers.authorization);
 
-  const authHeader = req.headers.authorization;
   let token = null;
 
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    token = authHeader.split(" ")[1];
-  } else if (req.cookies && req.cookies.token) {
-    //Si pas d'Authorization header, on tente avec les cookies
+  //Priorité : Cookie
+  if (req.cookies && req.cookies.token) {
     token = req.cookies.token;
+  } else if (req.headers.authorization?.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
   }
 
   if (!token) {
     console.error("Erreur: Aucun token trouvé");
     return res.status(401).json({
-      message: "Accès non autorisé. Connectez-vous!. Token manquant.",
+      message: "Accès non autorisé. Connectez-vous ! Token manquant.",
     });
   }
 

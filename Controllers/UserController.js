@@ -17,7 +17,6 @@ if (!JWT_SECRET) {
 export const afficherAccueil = (req, res) => {
   res.status(200).json({
     message: "Bienvenue sur la plateforme",
-    actions: ["Inscription", "Connexion"],
   });
 };
 
@@ -62,13 +61,13 @@ export const register = async (req, res) => {
   }
 };
 
-//Connexion utilisateur (admin ou user)
+// Connexion utilisateur (admin ou user)
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ message: "Email et mot de passe requis" });
+      return res.status(400).json({ message: "Email et mot de passe requis." });
     }
 
     const utilisateur = await prisma.User.findUnique({
@@ -79,9 +78,10 @@ export const login = async (req, res) => {
       !utilisateur ||
       !(await bcryptjs.compare(password, utilisateur.password))
     ) {
-      return res.status(401).json({ message: "Identifiants invalides" });
+      return res.status(401).json({ message: "Identifiants invalides." });
     }
 
+    // Créer le JWT
     const token = jwt.sign(
       {
         id: utilisateur.id,
@@ -89,20 +89,19 @@ export const login = async (req, res) => {
         role: utilisateur.role,
       },
       JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
+    // Définir le cookie sécurisé
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
-      maxAge: 3600000,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     });
-
+    // Envoyer la réponse
     res.status(200).json({
       message: "Connexion réussie",
-      token,
-      role: utilisateur.role,
       user: {
         id: utilisateur.id,
         nom: utilisateur.nom,
@@ -111,7 +110,7 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Erreur dans login:", error);
     res
       .status(500)
       .json({ message: "Erreur serveur", error: error.toString() });
@@ -147,14 +146,140 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
+// Obtenir tous les utilisateurs (Admin seulement)
+export const getAllUsers = async (req, res) => {
+  try {
+    if (req.user.role !== "ADMIN") {
+      return res
+        .status(403)
+        .json({
+          message:
+            "Accès refusé. Seuls les administrateurs peuvent voir tous les utilisateurs.",
+        });
+    }
+
+    const users = await prisma.User.findMany({
+      select: {
+        id: true,
+        nom: true,
+        email: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error("Erreur dans getAllUsers:", error);
+    res
+      .status(500)
+      .json({ message: "Erreur serveur", error: error.toString() });
+  }
+};
+
+// Créer un utilisateur par un administrateur
+export const createUserByAdmin = async (req, res) => {
+  const { nom, email, password, role } = req.body;
+
+  try {
+    if (req.user.role !== "ADMIN") {
+      return res
+        .status(403)
+        .json({
+          message:
+            "Accès refusé. Seuls les administrateurs peuvent créer des utilisateurs.",
+        });
+    }
+
+    if (!nom || !email || !password) {
+      return res.status(400).json({ message: "Tous les champs sont requis." });
+    }
+
+    const emailLowerCase = email.toLowerCase();
+    const utilisateurExiste = await prisma.User.findUnique({
+      where: { email: emailLowerCase },
+    });
+
+    if (utilisateurExiste) {
+      return res.status(400).json({ message: "Cet utilisateur existe déjà." });
+    }
+
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
+    const nouvelUtilisateur = await prisma.User.create({
+      data: {
+        nom,
+        email: emailLowerCase,
+        password: hashedPassword,
+        role: role?.toUpperCase() === "ADMIN" ? "ADMIN" : "USER",
+      },
+    });
+
+    res.status(201).json({
+      message: "Utilisateur créé avec succès par l'administrateur",
+      utilisateur: nouvelUtilisateur,
+    });
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Erreur serveur", error: error.toString() });
+  }
+};
+
 //deconnexion utilisateur (admin ou user)
 export const logout = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     sameSite: "Lax",
   });
   res.status(200).json({ message: "Déconnexion réussie" });
+};
+
+// Supprimer un utilisateur (Admin seulement)
+export const deleteUserByAdmin = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (req.user.role !== "ADMIN") {
+      return res
+        .status(403)
+        .json({
+          message:
+            "Accès refusé. Seuls les administrateurs peuvent supprimer des utilisateurs.",
+        });
+    }
+
+    // Optional: Prevent admin from deleting themselves
+    if (parseInt(id) === req.user.id) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Un administrateur ne peut pas supprimer son propre compte via cette fonction.",
+        });
+    }
+
+    const userToDelete = await prisma.User.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!userToDelete) {
+      return res.status(404).json({ message: "Utilisateur non trouvé." });
+    }
+
+    await prisma.User.delete({
+      where: { id: parseInt(id) },
+    });
+
+    res.status(200).json({ message: "Utilisateur supprimé avec succès." });
+  } catch (error) {
+    console.error("Erreur dans deleteUserByAdmin:", error);
+    res
+      .status(500)
+      .json({ message: "Erreur serveur", error: error.toString() });
+  }
 };
 
 //demande de reinitialisation de password
