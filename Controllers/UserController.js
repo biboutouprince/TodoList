@@ -150,12 +150,10 @@ export const getCurrentUser = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     if (req.user.role !== "ADMIN") {
-      return res
-        .status(403)
-        .json({
-          message:
-            "Accès refusé. Seuls les administrateurs peuvent voir tous les utilisateurs.",
-        });
+      return res.status(403).json({
+        message:
+          "Accès refusé. Seuls les administrateurs peuvent voir tous les utilisateurs.",
+      });
     }
 
     const users = await prisma.User.findMany({
@@ -183,12 +181,10 @@ export const createUserByAdmin = async (req, res) => {
 
   try {
     if (req.user.role !== "ADMIN") {
-      return res
-        .status(403)
-        .json({
-          message:
-            "Accès refusé. Seuls les administrateurs peuvent créer des utilisateurs.",
-        });
+      return res.status(403).json({
+        message:
+          "Accès refusé. Seuls les administrateurs peuvent créer des utilisateurs.",
+      });
     }
 
     if (!nom || !email || !password) {
@@ -243,22 +239,18 @@ export const deleteUserByAdmin = async (req, res) => {
 
   try {
     if (req.user.role !== "ADMIN") {
-      return res
-        .status(403)
-        .json({
-          message:
-            "Accès refusé. Seuls les administrateurs peuvent supprimer des utilisateurs.",
-        });
+      return res.status(403).json({
+        message:
+          "Accès refusé. Seuls les administrateurs peuvent supprimer des utilisateurs.",
+      });
     }
 
-    // Optional: Prevent admin from deleting themselves
+    // Optionel: empecher un administrateur de supprimer son propre compte
     if (parseInt(id) === req.user.id) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Un administrateur ne peut pas supprimer son propre compte via cette fonction.",
-        });
+      return res.status(400).json({
+        message:
+          "Un administrateur ne peut pas supprimer son propre compte via cette fonction.",
+      });
     }
 
     const userToDelete = await prisma.User.findUnique({

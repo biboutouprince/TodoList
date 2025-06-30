@@ -20,8 +20,8 @@ router.post("/signup", register);
 router.post("/login", login);
 router.get("/me", verifyToken, getCurrentUser);
 router.post("/logout", logout);
-router.post("/request-reset-password", requestResetPassword);
-router.post("/reset-password", resetPassword);
+router.post("/RequestResetPassword", requestResetPassword);
+router.post("/resetPassword", resetPassword);
 
 // Admin-specifiques routes
 router.get("/admin/users", verifyToken, getAllUsers);
