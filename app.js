@@ -7,6 +7,7 @@ import cors from "cors";
 import UserRoute from "./Routes/UserRoute.js";
 import TacheRoute from "./Routes/TacheRoute.js";
 import { sendTaskNotifications } from "./services/notificationService.js";
+//import authRoute from "./Routes/authRoute.js";
 
 const app = express();
 dotenv.config();
@@ -26,13 +27,14 @@ app.use(
 
 app.use("/", UserRoute);
 app.use("/tasks", TacheRoute);
+//app.use("/auth", authRoute);
 
 // Planifier la tâche pour s'exécuter tous les jours à 9h00 du matin.
 // Le format cron est : 'minute heure jour-du-mois mois jour-de-la-semaine'
 // '* * * * *' s'exécute toutes les minutes, ce qui est utile pour les tests.
 // '0 9 * * *' s'exécute tous les jours à 9h00.
 cron.schedule(
-  "0 16 * * *",
+  "0 14 * * *",
   () => {
     console.log(
       "Exécution de la tâche cron de notification des tâches en cours..."
