@@ -52,7 +52,7 @@ export const sendTaskNotifications = async () => {
         )
         .join(
           ""
-        )}</ul><p>Connectez-vous à votre tableau de bord pour les mettre à jour.</p><p>L'équipe de Gestion des Tâches</p>`;
+        )}</ul><p>Connectez-vous à votre tableau de bord pour les mettre à jour.</p><p>L'équipe de Olo-Task</p>`;
 
       await sendNotificationEmail(email, subject, html);
     }

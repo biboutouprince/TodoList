@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { sendNotificationEmail } from "../services/emailService.js";
 
 dotenv.config();
 
@@ -48,6 +49,25 @@ export const register = async (req, res) => {
         role: role?.toUpperCase() === "ADMIN" ? "ADMIN" : "USER", // Sécurisation du rôle
       },
     });
+
+    // Envoyer un e-mail de bienvenue
+    try {
+      const subject = "Bienvenue sur Olo-Task !";
+      const html = `
+        <h1>Bonjour ${nouvelUtilisateur.nom},</h1>
+        <p>Votre compte a été créé avec succès sur notre plateforme de gestion de tâches.</p>
+        <p>Vous pouvez maintenant vous connecter et commencer à organiser vos tâches.</p>
+        <p>Merci de nous rejoindre !</p>
+        <p>L'équipe Olo-Task</p>
+      `;
+      await sendNotificationEmail(nouvelUtilisateur.email, subject, html);
+    } catch (emailError) {
+      console.error(
+        "Erreur lors de l'envoi de l'e-mail de bienvenue:",
+        emailError
+      );
+      // Ne pas bloquer la réponse principale si l'e-mail échoue
+    }
 
     res.status(201).json({
       message: "Utilisateur inscrit avec succès",
@@ -210,6 +230,23 @@ export const createUserByAdmin = async (req, res) => {
         role: role?.toUpperCase() === "ADMIN" ? "ADMIN" : "USER",
       },
     });
+
+    // Envoyer un e-mail de bienvenue
+    try {
+      const subject = "Votre compte a été créé sur Olo-Task";
+      const html = `
+        <h1>Bonjour ${nouvelUtilisateur.nom},</h1>
+        <p>Un administrateur a créé un compte pour vous sur notre plateforme de gestion de tâches.</p>
+        <p>Vous pouvez vous connecter en utilisant votre adresse e-mail et le mot de passe qui vous a été communiqué.</p>
+        <p>L'équipe Olo-Task</p>
+      `;
+      await sendNotificationEmail(nouvelUtilisateur.email, subject, html);
+    } catch (emailError) {
+      console.error(
+        "Erreur lors de l'envoi de l'e-mail de bienvenue (admin):",
+        emailError
+      );
+    }
 
     res.status(201).json({
       message: "Utilisateur créé avec succès par l'administrateur",

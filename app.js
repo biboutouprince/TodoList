@@ -34,7 +34,7 @@ app.use("/tasks", TacheRoute);
 // '* * * * *' s'exécute toutes les minutes, ce qui est utile pour les tests.
 // '0 9 * * *' s'exécute tous les jours à 9h00.
 cron.schedule(
-  "0 14 * * *",
+  "0 9 * * *",
   () => {
     console.log(
       "Exécution de la tâche cron de notification des tâches en cours..."
